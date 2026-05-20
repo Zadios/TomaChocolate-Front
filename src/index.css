@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@theme {
+  --color-chocolate-dark: #372C2E;
+  --color-chocolate-mid: #563727;
+  --color-chocolate-gold: #DE9E48;
+}
+
+body {
+  background-color: var(--color-white);
+  color: var(--color-chocolate-dark);
+}
+
+@keyframes toast-pop {
+  0% {
+    opacity: 0;
+    /* Quitamos el -50% porque ya lo centra el Flexbox */
+    transform: translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-toast {
+  animation: toast-pop 0.3s ease-out forwards;
+}
