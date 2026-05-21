@@ -75,5 +75,5 @@ La aplicación estará disponible en http://localhost:5173 (o el puerto que indi
 └── **utils/** Funciones de ayuda y manejador de errores global
 
 ## Desarrollador
-
+***
 - Ariel Viscovich - [LinkedIn](https://www.linkedin.com/in/arielviscovich)
