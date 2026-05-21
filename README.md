@@ -6,7 +6,6 @@
 
 Este proyecto se conecta directamente con el backend desarrollado en Java: [TomaChocolate-API](https://github.com/Zadios/TomaChocolate-API).
 
-* * *
 
 ## Características Principales
 
@@ -16,7 +15,6 @@ Este proyecto se conecta directamente con el backend desarrollado en Java: [Toma
 - **Exportación de Resultados:** Permite copiar el resumen en formato de texto optimizado para WhatsApp o descargar un ticket visual en formato PNG.
 - **Sincronización en Tiempo Real:** Cuenta con un sistema de actualización automática (*polling*) para reflejar los cambios realizados por otros usuarios en la misma juntada.
 
-* * *
 
 ## Tecnologías Utilizadas
 
@@ -29,7 +27,6 @@ La interfaz de usuario fue desarrollada utilizando el ecosistema moderno de desa
 - **Lucide React** (para la iconografía del sitio).
 - **html-to-image** (para la generación y descarga de la imagen del ticket final).
 
-* * *
 
 ## Configuración local (clonar proyecto en otra computadora)
 
@@ -62,8 +59,6 @@ npm run dev
 
 La aplicación estará disponible en http://localhost:5173 (o el puerto que indique la consola).
 
-* * *
-
 ## Estructura del Proyecto
 
 **src/**  
@@ -75,5 +70,5 @@ La aplicación estará disponible en http://localhost:5173 (o el puerto que indi
 └── **utils/** Funciones de ayuda y manejador de errores global
 
 ## Desarrollador
-***
+
 - Ariel Viscovich - [LinkedIn](https://www.linkedin.com/in/arielviscovich)
