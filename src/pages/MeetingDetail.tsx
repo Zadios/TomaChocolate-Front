@@ -222,18 +222,19 @@ export default function MeetingDetail() {
 
   const copyTicketToClipboard = () => {
     if (!balanceData) return;
-    let text = `🍫 *Toma Chocolate: ${balanceData.meetingName}* 🍫\n\n`;
-    text += `💰 *Total gastado:* $${balanceData.totalAmount.toLocaleString()}\n`;
-    text += `👤 *Por persona:* $${balanceData.averagePerPerson.toLocaleString()}\n\n`;
-    text += `📋 *Detalle:* \n`;
+    let text = `${balanceData.meetingName}\n`;
+    text += `Generado con: ${window.location.origin}\n\n`;
+    text += `💰 Total gastado: $${balanceData.totalAmount.toLocaleString()}\n`;
+    text += `👤 Por persona: $${balanceData.averagePerPerson.toLocaleString()}\n\n`;
+    text += `📋 Detalle: \n`;
     balanceData.participantBalances.forEach(p => {
       text += `- ${p.name}: $${p.totalPaid.toLocaleString()}\n`;
     });
-    text += `\n🤝 *¿Cómo se arregla?* \n`;
+    text += `\n🤝 ¿Cómo se arregla? \n`;
     balanceData.transferSuggestions.forEach(t => {
       text += `- ${t.fromParticipant} le da $${t.amount.toLocaleString()} a ${t.toParticipant}\n`;
     });
-    text += `\nGenerado por Toma Chocolate 🍫`;
+    text += `\n Enlace de esta juntada: ${window.location.href}`;
     
     navigator.clipboard.writeText(text);
     setToastMessage("Ticket copiado");
@@ -384,6 +385,10 @@ export default function MeetingDetail() {
               <p className="text-[10px] font-bold text-chocolate-mid/50 uppercase tracking-widest mt-1">
                 Resumen y Sugerencia de pagos
               </p>
+            </div>
+
+            <div className="flex flex-col items-center mb-4">
+              <h5 className="font-serif text-chocolate-dark ">{meeting.name}</h5>
             </div>
 
             <div className="space-y-2 border-b border-dashed border-gray-200 pb-4 mb-4 text-sm">
