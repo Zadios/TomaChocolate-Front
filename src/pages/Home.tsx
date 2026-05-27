@@ -117,7 +117,7 @@ export default function Home() {
         <hr className="my-8 border-t border-gray-300" />
 
         {/* Recordatorios importantes */}
-        <div className="rounded-2xl p-6 md:p-8 max-w-3xl mx-auto">
+        <div className="p-6 md:p-8 max-w-3xl mx-auto">
           <h3 className="text-sm font-bold uppercase tracking-wider text-red-800 mb-5 flex items-center gap-2">
             <Info size={18} /> Tener en cuenta antes de empezar
           </h3>
@@ -139,7 +139,10 @@ export default function Home() {
             </div>
           </div>
         </div>
-
+        <hr className="my-8 border-t border-gray-300" />
+        <div className="p-6 md:p-8 max-w-3xl mx-auto">
+          <p className="italic text-chocolate-dark">TomaChocolate es un proyecto de código abierto. No recopilamos datos personales, emails ni contraseñas ya que no es necesario registrarte para usar esta herramienta. Toda la información de las salas es temporal y se elimina automáticamente.</p>
+        </div>
       </div>
 
       <Toast 
