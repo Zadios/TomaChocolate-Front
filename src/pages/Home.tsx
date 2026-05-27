@@ -16,6 +16,16 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleCreate = async () => {
+    if (!name.trim()) {
+      setToastMessage("Por favor, ingresá un nombre para la juntada");
+      return;
+    }
+
+    if (count < 2 || count > 30) {
+      setToastMessage("La cantidad de participantes debe ser entre 2 y 30");
+      return; 
+    }
+
     try {
       const newMeeting = await meetingService.createMeeting({ name, participantCount: count });
       navigate(`/meeting/${newMeeting.id}`);
