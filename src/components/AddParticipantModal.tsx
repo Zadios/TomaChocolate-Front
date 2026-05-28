@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function AddParticipantModal({ isOpen, onClose, newName, setNewName, onSubmit, isEditing }: Props) {
-  if (!isOpen) return null; // Si no está abierto, no renderiza nada
+  if (!isOpen) return null;
 
   return (
     <div 

@@ -25,13 +25,13 @@ import TomaChocolateLogo from '../assets/TomaChocolateCircle.svg';
 export default function MeetingDetail() {
   const { id } = useParams();
   
-  // --- STATE: DATA ---
+  // --- ESTADO: DATOS ---
   const [meeting, setMeeting] = useState<any>(null);
   const [balanceData, setBalanceData] = useState<MeetingBalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   
-  // --- STATE: UI & MODALS ---
+  // --- ESTADO: UI & MODALES ---
   const [showModal, setShowModal] = useState(false);
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
@@ -39,19 +39,19 @@ export default function MeetingDetail() {
   const [confirmConfig, setConfirmConfig] = useState({ title: '', message: '', onConfirm: () => {} });
   const [toastMessage, setToastMessage] = useState("");
   
-  // --- STATE: FORMS ---
+  // --- ESTADO: FORMULARIOS ---
   const [expenseData, setExpenseData] = useState({ description: '', amount: '', payerId: '' });
   const [editingExpenseId, setEditingExpenseId] = useState<number | null>(null);
   const [newParticipantName, setNewParticipantName] = useState("");
   const [editingParticipantId, setEditingParticipantId] = useState<number | null>(null);
 
-  // --- NETWORK LOGIC: FETCHING & POLLING ---
+  // --- LOGICA DE RED: FETCHING & POLLING ---
   const lastFetchTime = useRef<number>(0);
 
   const fetchData = useCallback(async () => {
     const now = Date.now();
     
-    // Cooldown check (3 seconds)
+    // Chequeo cada 3 segundos
     if (now - lastFetchTime.current < 3000) return;
 
     try {
@@ -89,7 +89,7 @@ export default function MeetingDetail() {
   }, [fetchData, isAnyModalOpen]);
 
 
-  // --- HANDLERS: PARTICIPANTS ---
+  // --- MANEJO: PARTICIPANTES ---
   const handleEditName = (pId: number, currentName: string) => {
     setEditingParticipantId(pId);
     setNewParticipantName(currentName);
@@ -132,7 +132,7 @@ export default function MeetingDetail() {
     );
   };
 
-  // --- HANDLERS: EXPENSES ---
+  // --- MANEJO: GASTOS ---
   const handleSubmitExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -194,7 +194,7 @@ export default function MeetingDetail() {
     );
   };
 
-  // --- UTILS: CALCULATIONS & EXPORTS ---
+  // --- UTILIDADES: CALCULOS Y EXPORTS ---
   const getTotalPaid = (name: string) => {
     const pBalance = balanceData?.participantBalances.find(b => b.name === name);
     return pBalance ? pBalance.totalPaid : 0;
@@ -288,7 +288,7 @@ export default function MeetingDetail() {
   return (
     <main className="max-w-2xl mx-auto p-4 sm:p-6 pb-16">
       
-      {/* SECTION: Overview */}
+      {/* SECCION: RESUMEN */}
       <section className="text-center mb-8">
         <h2 className="text-3xl font-extrabold text-chocolate-dark">{meeting?.name}</h2>
         <div className="flex flex-wrap justify-center gap-2 mt-3">
@@ -304,7 +304,7 @@ export default function MeetingDetail() {
         </div>
       </section>
 
-      {/* SECTION: Share Link */}
+      {/* SECCION: COMPARTIR ENLACE */}
       <section className="bg-white border border-gray-100 shadow-xl rounded-3xl p-6 mb-8 text-center border-t-4 border-t-chocolate-gold">
         <p className="font-semibold text-chocolate-dark mb-4 flex items-center justify-center gap-2">
           <span>¡Compartí el enlace para que cada uno sume sus gastos!</span>
@@ -328,7 +328,7 @@ export default function MeetingDetail() {
         </div>
       </section>
 
-      {/* SECTION: Participants List */}
+      {/* SECCION: LISTA DE PARTICIPANTES */}
       <section className="mb-10">
         <div className="flex justify-between items-center mb-4 px-1">
           <h3 className="text-xl font-bold text-chocolate-dark">Participantes</h3>
@@ -370,7 +370,7 @@ export default function MeetingDetail() {
         </div>
       </section>
 
-      {/* SECTION: Final Ticket */}
+      {/* SECCION: TICKET FINAL */}
       {balanceData && balanceData.totalAmount > 0 && (
         <section className="mt-12 mb-24 animate-in zoom-in-95 duration-500 max-w-sm mx-auto ">
           <div 
@@ -446,7 +446,7 @@ export default function MeetingDetail() {
         </section>
       )}
 
-      {/* SECTION: Floating Action Button */}
+      {/* SECCION: BOTON FLOTANTE */}
       <div className="sticky bottom-8 mt-12 flex justify-center px-4 z-[40]">
         <button 
           onClick={() => setShowModal(true)} 
@@ -457,7 +457,7 @@ export default function MeetingDetail() {
         </button>
       </div>
 
-      {/* SECTION: Modals */}
+      {/* SECCION: MODALES */}
       <ExpenseFormModal 
         isOpen={showModal}
         onClose={() => {

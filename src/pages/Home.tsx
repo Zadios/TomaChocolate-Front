@@ -37,7 +37,7 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center pt-12 px-4 pb-16 min-h-[80vh]">
       
-      {/* --- TARJETA ORIGINAL (INTACTA) --- */}
+      {/* --- TARJETA NUEVA JUNTADA */}
       <div className="w-full max-w-md p-8 border border-gray-100 rounded-3xl shadow-2xl bg-white mb-16 border-t-4 border-t-chocolate-gold">
         <h2 className="text-2xl font-bold text-chocolate-dark mb-6 text-center">Nueva Juntada</h2>
         
@@ -79,7 +79,7 @@ export default function Home() {
         </div>
       </div>
       
-      {/* --- NUEVA SECCIÓN DE ONBOARDING PASIVO --- */}
+      {/* --- ONBOARDING PASIVO --- */}
       <div className="w-full max-w-4xl space-y-12 text-gray-600 animate-fade-in">
         
         {/* Cómo funciona */}

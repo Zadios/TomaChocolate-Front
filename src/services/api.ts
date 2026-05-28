@@ -1,13 +1,11 @@
 import axios from 'axios';
 
-// La URL de tu backend de Spring Boot
-const API_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
-const api = axios.create({
-    baseURL: API_URL,
+export const api = axios.create({
+  baseURL: API_BASE_URL,
 });
 
-// Interfaces para los nuevos DTOs
 export interface ExpenseRequest {
     description: string;
     amount: number;
@@ -31,33 +29,28 @@ export interface MeetingBalanceResponse {
     totalAmount: number;
     averagePerPerson: number;
     participantBalances: ParticipantBalance[];
-    transferSuggestions: TransferStrategy[]; // Coincide con tu Record
+    transferSuggestions: TransferStrategy[];
 }
 
-// Definimos la interfaz del Request (igual al MeetingRequest de Java)
 export interface MeetingRequest {
     name: string;
     participantCount: number;
 };
 
-// Definimos la interfaz de la Respuesta (lo que devuelve tu MeetingController)
 export interface Meeting {
-    id: string; // UUID en Java es string en TS
+    id: string;
     name: string;
     participantCount: number;
 };
 
 export const participantService = {
   createParticipant: (meetingId: string, name: string) => {
-    // Retornamos la promesa directamente
-    // Pasamos 'name' como el body del POST
     return api.post(`/participants/${meetingId}/participant`, name, {
-      headers: { 'Content-Type': 'text/plain' } // Importante si Java espera un String plano
+      headers: { 'Content-Type': 'text/plain' }
     });
   },
 
   updateName: async (id: number, name: string): Promise<void> => {
-    // Usamos PATCH como en tu Controller
     await api.patch(`/participants/${id}`, { name });
   },
   
@@ -85,7 +78,6 @@ export const meetingService = {
 
 export const expenseService = {
     createExpense: (meetingId: string, data: ExpenseRequest) => {
-        // Tu ruta es /api/expenses/{meetingId}/expenses
         return api.post(`/expenses/${meetingId}/expenses`, data);
     },
     updateExpense: (expenseId: number, data: ExpenseRequest) => {

@@ -14,7 +14,6 @@ body {
 @keyframes toast-pop {
   0% {
     opacity: 0;
-    /* Quitamos el -50% porque ya lo centra el Flexbox */
     transform: translateY(20px) scale(0.9);
   }
   100% {

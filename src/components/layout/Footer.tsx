@@ -21,7 +21,7 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Social Links */}
+          {/* Links Sociales */}
           <div className="flex gap-5">
             <a 
               href="https://github.com/Zadios/TomaChocolate-API" 
@@ -55,10 +55,10 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Separator */}
+        {/* Separador */}
         <div className="border-t border-white/10 mb-8"></div>
 
-        {/* Professional Credits */}
+        {/* Creditos */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] text-white/50 font-bold uppercase tracking-[0.10em]">
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
             <p>© {new Date().getFullYear()} TOMA CHOCOLATE</p>
