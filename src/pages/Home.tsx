@@ -11,9 +11,10 @@ import { Sparkles, Share2, Calculator, Info, Clock, AlertTriangle } from 'lucide
  */
 export default function Home() {
   const [name, setName] = useState('');
-  const [count, setCount] = useState(2);
+  const [count, setCount] = useState<number | ''>(2);
   const [toastMessage, setToastMessage] = useState("");
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreate = async () => {
     if (!name.trim()) {
@@ -21,16 +22,40 @@ export default function Home() {
       return;
     }
 
-    if (count < 2 || count > 30) {
+    // Ojo acá: convertimos temporalmente a número por si quedó en blanco ('')
+    const currentCount = Number(count);
+
+    if (currentCount < 2 || currentCount > 30) {
       setToastMessage("La cantidad de participantes debe ser entre 2 y 30");
       return; 
     }
 
+    setIsLoading(true); // 1. Bloqueamos ni bien pasa las validaciones
+
     try {
-      const newMeeting = await meetingService.createMeeting({ name, participantCount: count });
+      const newMeeting = await meetingService.createMeeting({ name, participantCount: currentCount });
       navigate(`/meeting/${newMeeting.id}`);
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al crear la juntada"));
+      setIsLoading(false); // Si hay error, liberamos el botón para que intente de nuevo
+    } finally {
+      // Nota: Si navigate funciona, el componente se desmonta, 
+      // pero ponerlo en el finally asegura que si algo falla o se traba, el loading se apague.
+      setIsLoading(false); 
+    }
+  };
+
+  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+
+    if (value === '') {
+      setCount(''); // Si borró todo, dejamos el input en blanco
+      return;
+    }
+
+    const parsed = parseInt(value, 10);
+    if (!isNaN(parsed)) {
+      setCount(parsed);
     }
   };
 
@@ -66,15 +91,20 @@ export default function Home() {
               max="30" 
               className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-chocolate-gold outline-none transition-all"
               value={count} 
-              onChange={(e) => setCount(Number(e.target.value))}
+              onChange={handleCountChange}
             />
           </div>
           
           <button 
             onClick={handleCreate} 
-            className="w-full bg-chocolate-gold text-chocolate-dark py-4 rounded-xl font-semibold text-lg hover:brightness-110 active:scale-95 transition-all shadow-md"
-          >
-            Crear Juntada
+            disabled={isLoading}
+            className={`w-full text-chocolate-dark py-4 rounded-xl font-semibold text-lg transition-all shadow-md 
+              ${isLoading 
+                ? "bg-gray-400 cursor-not-allowed opacity-70"
+                : "bg-chocolate-gold hover:brightness-110 active:scale-95"
+              }`}
+            >
+            {isLoading ? "Creando Juntada..." : "Crear Juntada"}
           </button>
         </div>
       </div>

@@ -29,6 +29,7 @@ export default function MeetingDetail() {
   const [meeting, setMeeting] = useState<any>(null);
   const [balanceData, setBalanceData] = useState<MeetingBalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(false);
   
   // --- ESTADO: UI & MODALES ---
@@ -51,8 +52,8 @@ export default function MeetingDetail() {
   const fetchData = useCallback(async () => {
     const now = Date.now();
     
-    // Chequeo cada 3 segundos
-    if (now - lastFetchTime.current < 3000) return;
+    // Chequeo cada 2 segundos
+    if (now - lastFetchTime.current < 2000) return;
 
     try {
       if (id) {
@@ -100,6 +101,8 @@ export default function MeetingDetail() {
     e.preventDefault();
     if (!newParticipantName.trim() || !id) return;
 
+    setIsSubmitting(true);
+
     try {
       if (editingParticipantId) {
         await participantService.updateName(editingParticipantId, newParticipantName);
@@ -114,6 +117,8 @@ export default function MeetingDetail() {
       
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al procesar el participante"));
+    } finally {
+      setIsSubmitting(false); //
     }
   };
 
@@ -136,6 +141,8 @@ export default function MeetingDetail() {
   const handleSubmitExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
+
+    setIsSubmitting(true);
 
     try {
       const data = {
@@ -165,6 +172,8 @@ export default function MeetingDetail() {
 
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al procesar el gasto"));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -471,6 +480,7 @@ export default function MeetingDetail() {
         setExpenseData={setExpenseData}
         participants={meeting?.participants || []}
         isEditing={!!editingExpenseId}
+        isSubmitting={isSubmitting}
       />
 
       <AddParticipantModal 
@@ -485,6 +495,7 @@ export default function MeetingDetail() {
         setNewName={setNewParticipantName}
         onSubmit={handleSubmitParticipant}
         isEditing={!!editingParticipantId}
+        isSubmitting={isSubmitting}
       />
 
       <ExpensesListModal 

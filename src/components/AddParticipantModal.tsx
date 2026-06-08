@@ -7,39 +7,68 @@ interface Props {
   setNewName: (name: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   isEditing?: boolean;
+  isSubmitting: boolean;
 }
 
-export default function AddParticipantModal({ isOpen, onClose, newName, setNewName, onSubmit, isEditing }: Props) {
+export default function AddParticipantModal({ 
+  isOpen, 
+  onClose, 
+  newName, 
+  setNewName, 
+  onSubmit, 
+  isEditing,
+  isSubmitting // <-- 2. La recibimos acá
+}: Props) {
   if (!isOpen) return null;
 
   return (
     <div 
-    className="fixed inset-0 bg-chocolate-dark/60 backdrop-blur-sm flex items-center justify-center z-[120] p-4 animate-in fade-in"
-    onClick={onClose}
+      className="fixed inset-0 bg-chocolate-dark/60 backdrop-blur-sm flex items-center justify-center z-[120] p-4 animate-in fade-in"
+      onClick={isSubmitting ? undefined : onClose} // Si está cargando, bloqueamos el cierre al hacer clic afuera
     >
       <div 
-      className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in zoom-in-95"
-      onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in zoom-in-95"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
             <h3 className="text-xl font-bold text-chocolate-dark">
                 {isEditing ? "Editar Participante" : "Nuevo Participante"}
             </h3>
-            <button onClick={onClose} className="cursor-pointer text-gray-400 text-2xl hover:text-gray-500"><X size={18} strokeWidth={2.5}/></button>
+            {/* Bloqueamos el botón de cerrar de la cruz si está procesando */}
+            <button 
+              onClick={onClose} 
+              disabled={isSubmitting}
+              className="cursor-pointer text-gray-400 text-2xl hover:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <X size={18} strokeWidth={2.5}/>
+            </button>
         </div>
         
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">{isEditing ? "Cambiar nombre" : "Nombre"}</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">
+              {isEditing ? "Cambiar nombre" : "Nombre"}
+            </label>
             <input 
               autoFocus required type="text" maxLength={10} placeholder="¿Cómo se llama?" 
-              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold"
+              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold disabled:opacity-60"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
+              disabled={isSubmitting} // <-- Deshabilitamos el input mientras procesa
             />
           </div>
-          <button type="submit" className="w-full bg-chocolate-gold text-chocolate-dark hover:brightness-110 active:scale-95 py-4 rounded-2xl font-semibold text-lg shadow-lg">
-            Confirmar
+
+          {/* 3. Aplicamos el botón dinámico con tus estilos originales */}
+          <button 
+            type="submit" 
+            disabled={isSubmitting}
+            className={`w-full text-chocolate-dark py-4 rounded-2xl font-semibold text-lg shadow-lg transition-all 
+              ${isSubmitting 
+                ? "bg-gray-400 cursor-not-allowed opacity-70" 
+                : "bg-chocolate-gold hover:brightness-110 active:scale-95"
+              }`}
+          >
+            {isSubmitting ? "Confirmando..." : "Confirmar"}
           </button>
         </form>
       </div>

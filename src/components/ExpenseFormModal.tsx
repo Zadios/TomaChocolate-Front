@@ -12,6 +12,7 @@ interface Props {
   setExpenseData: (data: any) => void;
   participants: any[];
   isEditing: boolean;
+  isSubmitting: boolean; // 🚀 1. Agregamos la Prop a la interfaz
 }
 
 export default function ExpenseFormModal({ 
@@ -21,25 +22,32 @@ export default function ExpenseFormModal({
   expenseData, 
   setExpenseData, 
   participants,
-  isEditing 
+  isEditing,
+  isSubmitting // 🚀 2. La recibimos acá
 }: Props) {
   
   if (!isOpen) return null;
 
   return (
     <div 
-    className="fixed inset-0 bg-chocolate-dark/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100] p-4 animate-in fade-in duration-200"
-    onClick={onClose}
+      className="fixed inset-0 bg-chocolate-dark/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100] p-4 animate-in fade-in duration-200"
+      onClick={isSubmitting ? undefined : onClose} // Bloquea el cierre si está cargando
     >
       <div 
-      className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom-10 duration-300"
-      onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom-10 duration-300"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-chocolate-dark">
             {isEditing ? "Editar Gasto" : "Crear Gasto"}
           </h3>
-          <button onClick={onClose} className="cursor-pointer text-gray-400 text-2xl hover:text-gray-500"><X size={18} strokeWidth={2.5}/></button>
+          <button 
+            onClick={onClose} 
+            disabled={isSubmitting} // Bloquea la cruz de cerrar
+            className="cursor-pointer text-gray-400 text-2xl hover:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <X size={18} strokeWidth={2.5}/>
+          </button>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">
@@ -48,7 +56,8 @@ export default function ExpenseFormModal({
             <label className="block text-xs font-semibold text-gray-400 uppercase mb-1 ml-1">¿Quién pagó?</label>
             <select 
               required 
-              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold"
+              disabled={isSubmitting} // Bloquea el select durante el envío
+              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold disabled:opacity-60"
               value={expenseData.payerId} 
               onChange={(e) => setExpenseData({...expenseData, payerId: e.target.value})}
             >
@@ -66,8 +75,9 @@ export default function ExpenseFormModal({
               required 
               type="text" 
               maxLength={20}
+              disabled={isSubmitting} // Bloquea el input de descripción
               placeholder="Ej: Carbón y carne" 
-              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold"
+              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold disabled:opacity-60"
               value={expenseData.description} 
               onChange={(e) => setExpenseData({...expenseData, description: e.target.value})}
             />
@@ -79,19 +89,29 @@ export default function ExpenseFormModal({
             <input 
               required 
               type="number" 
+              disabled={isSubmitting} // Bloquea el input de monto
               placeholder="0.00" 
               max={9999999}
-              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold font-mono text-lg"
+              className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold font-mono text-lg disabled:opacity-60"
               value={expenseData.amount} 
               onChange={(e) => setExpenseData({...expenseData, amount: e.target.value})}
             />
           </div>
 
+          {/* 🚀 3. Botón condicional respetando tu diseño */}
           <button 
             type="submit" 
-            className="w-full bg-chocolate-gold text-chocolate-dark py-4 rounded-2xl font-semibold text-lg shadow-lg hover:brightness-105 active:scale-95 transition-all mt-4"
+            disabled={isSubmitting}
+            className={`w-full text-chocolate-dark py-4 rounded-2xl font-semibold text-lg shadow-lg transition-all mt-4
+              ${isSubmitting 
+                ? "bg-gray-400 cursor-not-allowed opacity-70" 
+                : "bg-chocolate-gold hover:brightness-105 active:scale-95"
+              }`}
           >
-            {isEditing ? "Guardar Cambios" : "Confirmar Gasto"}
+            {isSubmitting 
+              ? (isEditing ? "Guardando Cambios..." : "Confirmando Gasto...") 
+              : (isEditing ? "Guardar Cambios" : "Confirmar Gasto")
+            }
           </button>
         </form>
       </div>
