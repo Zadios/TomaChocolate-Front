@@ -22,7 +22,6 @@ export default function Home() {
       return;
     }
 
-    // Ojo acá: convertimos temporalmente a número por si quedó en blanco ('')
     const currentCount = Number(count);
 
     if (currentCount < 2 || currentCount > 30) {
@@ -30,17 +29,15 @@ export default function Home() {
       return; 
     }
 
-    setIsLoading(true); // 1. Bloqueamos ni bien pasa las validaciones
+    setIsLoading(true);
 
     try {
       const newMeeting = await meetingService.createMeeting({ name, participantCount: currentCount });
       navigate(`/meeting/${newMeeting.id}`);
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al crear la juntada"));
-      setIsLoading(false); // Si hay error, liberamos el botón para que intente de nuevo
+      setIsLoading(false);
     } finally {
-      // Nota: Si navigate funciona, el componente se desmonta, 
-      // pero ponerlo en el finally asegura que si algo falla o se traba, el loading se apague.
       setIsLoading(false); 
     }
   };
@@ -49,7 +46,7 @@ export default function Home() {
     const value = e.target.value;
 
     if (value === '') {
-      setCount(''); // Si borró todo, dejamos el input en blanco
+      setCount('');
       return;
     }
 

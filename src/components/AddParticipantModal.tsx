@@ -17,14 +17,14 @@ export default function AddParticipantModal({
   setNewName, 
   onSubmit, 
   isEditing,
-  isSubmitting // <-- 2. La recibimos acá
+  isSubmitting
 }: Props) {
   if (!isOpen) return null;
 
   return (
     <div 
       className="fixed inset-0 bg-chocolate-dark/60 backdrop-blur-sm flex items-center justify-center z-[120] p-4 animate-in fade-in"
-      onClick={isSubmitting ? undefined : onClose} // Si está cargando, bloqueamos el cierre al hacer clic afuera
+      onClick={isSubmitting ? undefined : onClose}
     >
       <div 
         className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 animate-in zoom-in-95"
@@ -34,7 +34,6 @@ export default function AddParticipantModal({
             <h3 className="text-xl font-bold text-chocolate-dark">
                 {isEditing ? "Editar Participante" : "Nuevo Participante"}
             </h3>
-            {/* Bloqueamos el botón de cerrar de la cruz si está procesando */}
             <button 
               onClick={onClose} 
               disabled={isSubmitting}
@@ -54,11 +53,10 @@ export default function AddParticipantModal({
               className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold disabled:opacity-60"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              disabled={isSubmitting} // <-- Deshabilitamos el input mientras procesa
+              disabled={isSubmitting}
             />
           </div>
 
-          {/* 3. Aplicamos el botón dinámico con tus estilos originales */}
           <button 
             type="submit" 
             disabled={isSubmitting}

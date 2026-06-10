@@ -12,7 +12,7 @@ interface Props {
   setExpenseData: (data: any) => void;
   participants: any[];
   isEditing: boolean;
-  isSubmitting: boolean; // 🚀 1. Agregamos la Prop a la interfaz
+  isSubmitting: boolean;
 }
 
 export default function ExpenseFormModal({ 
@@ -23,7 +23,7 @@ export default function ExpenseFormModal({
   setExpenseData, 
   participants,
   isEditing,
-  isSubmitting // 🚀 2. La recibimos acá
+  isSubmitting
 }: Props) {
   
   if (!isOpen) return null;
@@ -31,7 +31,7 @@ export default function ExpenseFormModal({
   return (
     <div 
       className="fixed inset-0 bg-chocolate-dark/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[100] p-4 animate-in fade-in duration-200"
-      onClick={isSubmitting ? undefined : onClose} // Bloquea el cierre si está cargando
+      onClick={isSubmitting ? undefined : onClose}
     >
       <div 
         className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 animate-in slide-in-from-bottom-10 duration-300"
@@ -43,7 +43,7 @@ export default function ExpenseFormModal({
           </h3>
           <button 
             onClick={onClose} 
-            disabled={isSubmitting} // Bloquea la cruz de cerrar
+            disabled={isSubmitting}
             className="cursor-pointer text-gray-400 text-2xl hover:text-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X size={18} strokeWidth={2.5}/>
@@ -56,7 +56,7 @@ export default function ExpenseFormModal({
             <label className="block text-xs font-semibold text-gray-400 uppercase mb-1 ml-1">¿Quién pagó?</label>
             <select 
               required 
-              disabled={isSubmitting} // Bloquea el select durante el envío
+              disabled={isSubmitting}
               className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold disabled:opacity-60"
               value={expenseData.payerId} 
               onChange={(e) => setExpenseData({...expenseData, payerId: e.target.value})}
@@ -75,7 +75,7 @@ export default function ExpenseFormModal({
               required 
               type="text" 
               maxLength={20}
-              disabled={isSubmitting} // Bloquea el input de descripción
+              disabled={isSubmitting}
               placeholder="Ej: Carbón y carne" 
               className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold disabled:opacity-60"
               value={expenseData.description} 
@@ -89,7 +89,7 @@ export default function ExpenseFormModal({
             <input 
               required 
               type="number" 
-              disabled={isSubmitting} // Bloquea el input de monto
+              disabled={isSubmitting}
               placeholder="0.00" 
               max={9999999}
               className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl outline-none focus:ring-2 focus:ring-chocolate-gold font-mono text-lg disabled:opacity-60"
@@ -98,7 +98,6 @@ export default function ExpenseFormModal({
             />
           </div>
 
-          {/* 🚀 3. Botón condicional respetando tu diseño */}
           <button 
             type="submit" 
             disabled={isSubmitting}
