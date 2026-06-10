@@ -49,11 +49,11 @@ export default function MeetingDetail() {
   // --- LOGICA DE RED: FETCHING & POLLING ---
   const lastFetchTime = useRef<number>(0);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (force = false) => {
     const now = Date.now();
     
-    // Chequeo cada 2 segundos
-    if (now - lastFetchTime.current < 2000) return;
+    // 🚀 Si 'force' es true, salteamos este IF y no abortamos el fetch
+    if (!force && (now - lastFetchTime.current < 3000)) return;
 
     try {
       if (id) {
@@ -113,7 +113,7 @@ export default function MeetingDetail() {
       setShowAddParticipantModal(false);
       setNewParticipantName("");
       setEditingParticipantId(null);
-      await fetchData(); 
+      await fetchData(true); 
       
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al procesar el participante"));
@@ -129,7 +129,7 @@ export default function MeetingDetail() {
       async () => {
         try {
           await participantService.deleteParticipant(pId);
-          fetchData();
+          fetchData(true); //
         } catch (err: any) { 
           setToastMessage(extractErrorMessage(err, "Error al eliminar participante"));
         }
@@ -195,7 +195,7 @@ export default function MeetingDetail() {
       async () => {
         try {
           await expenseService.deleteExpense(id!, exp.id);
-          await fetchData(); 
+          await fetchData(true);
         } catch(e) {
           setToastMessage("No se pudo borrar");
         }
@@ -210,7 +210,11 @@ export default function MeetingDetail() {
   };
 
   const getRemainingTime = (createdAt: string) => {
-    const expirationDate = new Date(createdAt);
+    const utcString = createdAt.endsWith('Z') || createdAt.includes('+') 
+      ? createdAt 
+      : `${createdAt}Z`;
+
+    const expirationDate = new Date(utcString);
     expirationDate.setHours(expirationDate.getHours() + 48);
     
     const now = new Date();
