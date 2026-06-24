@@ -63,18 +63,15 @@ The application will be available at http://localhost:5173 (or the port indicate
 
 ## Project Structure
 
-**src/**  
-├── **assets/** Logos, images, and vectors
-
-├── **components/** Reusable components (Modals, Toast, etc.)
-
-│ └── **layout/** Structural components (Header, Footer)
-
-├── **pages/** Main application views (Home, MeetingDetail)
-
-├── **services/** Axios configuration and API route calls
-
-└── **utils/** Helper functions and global error handler
+```text
+src/
+├── assets/        # Logos, images, and vectors
+├── components/    # Reusable components (Modals, Toast, etc.)
+│ └── layout/      # Structural components (Header, Footer)
+├── pages/         # Main application views (Home, MeetingDetail)
+├── services/      # Axios configuration and API route calls
+└── utils/         # Helper functions and global error handler
+```
 
 ## Developer
 
