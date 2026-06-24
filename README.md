@@ -1,74 +1,81 @@
-# Toma Chocolate - Frontend
+# TomaChocolate - Frontend
 
-> "Toma chocolate, paga lo que debes."
+> **Live Demo:** [tomachocolate.vercel.app](https://tomachocolate.vercel.app/)
 
-¡Bienvenido al repositorio del frontend de **Toma Chocolate**! Esta es la interfaz web de una aplicación diseñada para simplificar y optimizar la división de gastos grupales en juntadas, asados o eventos. El objetivo principal es ofrecer una experiencia de usuario sumamente sencilla, rápida y sólida pero sin dejar de lado funcionalidades en el proceso.
+*Note: The application interface is in Spanish as it is tailored for local users in Latin America to split everyday expenses.*
 
-Este proyecto se conecta directamente con el backend desarrollado en Java: [TomaChocolate-API](https://github.com/Zadios/TomaChocolate-API).
+Welcome to the TomaChocolate frontend repository! This is the web interface of an application designed to simplify and optimize the split of group expenses in gatherings, barbecues, or events. The main goal is to offer an extremely simple, fast, and robust user experience without leaving functionalities aside in the process.
 
-
-## Características Principales
-
-- **Creación Rápida de Juntadas:** Permite inicializar un evento definiendo el nombre y la cantidad de participantes en segundos.
-- **Gestión de Participantes y Gastos:** Añadí, editá o eliminá miembros del grupo y asigná los gastos correspondientes de manera dinámica.
-- **Cálculo Inteligente de Saldos:** Automatiza la división de cuentas mostrando de forma clara quién le debe a quién, minimizando las transferencias necesarias.
-- **Exportación de Resultados:** Permite copiar el resumen en formato de texto optimizado para WhatsApp o descargar un ticket visual en formato PNG.
-- **Sincronización en Tiempo Real:** Cuenta con un sistema de actualización automática (*polling*) para reflejar los cambios realizados por otros usuarios en la misma juntada.
+This project connects directly with the backend developed in Java: [TomaChocolate-API](https://github.com/Zadios/TomaChocolate-API).
 
 
-## Tecnologías Utilizadas
+## Main Features
 
-La interfaz de usuario fue desarrollada utilizando el ecosistema moderno de desarrollo web:
-
-- **React** (con TypeScript para un tipado seguro y robusto).
-- **Vite** (como empaquetador y entorno de desarrollo ultra rápido).
-- **Tailwind CSS** (para el diseño de estilos modular, moderno y adaptativo).
-- **React Router DOM** (para la navegación entre pantallas).
-- **Lucide React** (para la iconografía del sitio).
-- **html-to-image** (para la generación y descarga de la imagen del ticket final).
+- **Quick Gathering Creation:** Allows initializing an event by defining the name and the number of participants in seconds.
+- **Participant and Expense Management:** Add, edit, or delete group members and dynamically assign the corresponding expenses.
+- **Smart Balance Calculation:** Automates the split of bills, clearly showing who owes whom, minimizing the necessary transfers.
+- **Export Results:** Allows copying the summary in a text format optimized for WhatsApp or downloading a visual ticket in PNG format.
+- **Real-Time Synchronization:** Features an automatic update system (polling) to reflect changes made by other users in the same gathering.
 
 
-## Configuración local (clonar proyecto en otra computadora)
+## Technologies Used
 
-#### 1\. Clonar el repositorio
+The user interface was developed using the modern web development ecosystem:
+
+- **React** (with TypeScript for safe and robust typing).
+- **Vite** (as a bundler and ultra-fast development environment).
+- **Tailwind CSS** (for modular, modern, and adaptive style design).
+- **React Router DOM** (for navigation between screens).
+- **Lucide React** (for the site's iconography).
+- **html-to-image** (for generating and downloading the final ticket image).
+
+
+## Local Setup (clone project on another computer)
+
+#### 1\. Clone the repository
 
 ```bash
 git clone https://github.com/Zadios/TomaChocolate-Front.git
 cd TomaChocolate-Front
 ```
 
-#### 2\. Instalar las dependencias:
+#### 2\. Install dependencies:
 
 ```bash
 npm install
 ```
 
-#### 3\. Configurar las variables de entorno:
+#### 3\. Configure environment variables:
 
-Creá un archivo .env.local en la raíz del proyecto y configurá la URL de tu API local (o de producción):
+Create a .env.local file in the project root and configure the URL of your local (or production) API:
 
 ```bash
 VITE_API_URL=http://localhost:8080/api
 ```
 
-#### 4\. Correr el servidor de desarrollo:
+#### 4\. Run the development server:
 
 ```bash
 npm run dev
 ```
 
-La aplicación estará disponible en http://localhost:5173 (o el puerto que indique la consola).
+The application will be available at http://localhost:5173 (or the port indicated by the console).
 
-## Estructura del Proyecto
+## Project Structure
 
 **src/**  
-├── **assets/** Logos, imágenes y vectores  
-├── **components/** Componentes reutilizables (Modales, Toast, etc.)  
-│ └── **layout/** Componentes estructurales (Header, Footer)  
-├── **pages/** Vistas principales de la aplicación (Home, MeetingDetail)  
-├── **services/** Configuración de Axios y llamadas a las rutas de la API  
-└── **utils/** Funciones de ayuda y manejador de errores global
+├── **assets/** Logos, images, and vectors
 
-## Desarrollador
+├── **components/** Reusable components (Modals, Toast, etc.)
+
+│ └── **layout/** Structural components (Header, Footer)
+
+├── **pages/** Main application views (Home, MeetingDetail)
+
+├── **services/** Axios configuration and API route calls
+
+└── **utils/** Helper functions and global error handler
+
+## Developer
 
 - Ariel Viscovich - [LinkedIn](https://www.linkedin.com/in/arielviscovich)
