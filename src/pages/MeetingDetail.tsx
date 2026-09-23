@@ -4,7 +4,7 @@ import { toPng } from 'html-to-image';
 import { Trash2, Pencil, UserRoundPlus, FilePlusCorner, Copy, Clock, Download } from 'lucide-react';
 
 // API Services & Utils
-import { expenseService, meetingService, participantService, type MeetingBalanceResponse } from '../services/api';
+import { expenseService, meetingService, participantService, type ExpenseRequest, type MeetingBalanceResponse } from '../services/api';
 import { extractErrorMessage } from '../utils/errorHandler';
 
 // Components
@@ -37,22 +37,28 @@ export default function MeetingDetail() {
   const [showExpensesModal, setShowExpensesModal] = useState(false);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [confirmConfig, setConfirmConfig] = useState({ title: '', message: '', onConfirm: () => {} });
+  const [confirmConfig, setConfirmConfig] = useState<{
+    title: string;
+    message: string;
+    confirmText?: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+  }>({ title: '', message: '', confirmText: 'Eliminar', onConfirm: () => {} });
   const [toastMessage, setToastMessage] = useState("");
   
   // --- ESTADO: FORMULARIOS ---
-  const [expenseData, setExpenseData] = useState({ description: '', amount: '', payerId: '' });
+  const [expenseData, setExpenseData] = useState<{ description: string; amount: string; payerId: string; consumerIds: number[];}>({ description: '', amount: '', payerId: '', consumerIds: []});
   const [editingExpenseId, setEditingExpenseId] = useState<number | null>(null);
   const [newParticipantName, setNewParticipantName] = useState("");
   const [editingParticipantId, setEditingParticipantId] = useState<number | null>(null);
 
-  // --- LOGICA DE RED: FETCHING & POLLING ---
+  // --- LOGICA DE RED & REFS (CONCURRENCIA & LOCKING) ---
   const lastFetchTime = useRef<number>(0);
+  const isSubmittingRef = useRef<boolean>(false);
 
   const fetchData = useCallback(async (force = false) => {
     const now = Date.now();
     
-    // 🚀 Si 'force' es true, salteamos este IF y no abortamos el fetch
     if (!force && (now - lastFetchTime.current < 3000)) return;
 
     try {
@@ -97,28 +103,75 @@ export default function MeetingDetail() {
     setShowAddParticipantModal(true);
   };
 
-  const handleSubmitParticipant = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newParticipantName.trim() || !id) return;
-
+  const executeCreateParticipant = async (name: string, includeInAllExpenses: boolean) => {
+    if (!id || isSubmittingRef.current) return;
+    
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
-      if (editingParticipantId) {
-        await participantService.updateName(editingParticipantId, newParticipantName);
-      } else {
-        await participantService.createParticipant(id, newParticipantName);
-      }
-      
-      setShowAddParticipantModal(false);
+      await participantService.createParticipant(id, name, includeInAllExpenses);
       setNewParticipantName("");
       setEditingParticipantId(null);
-      await fetchData(true); 
-      
+      await fetchData(true);
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al procesar el participante"));
     } finally {
-      setIsSubmitting(false); //
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmitParticipant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newParticipantName.trim() || !id || isSubmittingRef.current) return;
+
+    // Edición de nombre existente
+    if (editingParticipantId) {
+      isSubmittingRef.current = true;
+      setIsSubmitting(true);
+      try {
+        await participantService.updateName(editingParticipantId, newParticipantName);
+        setShowAddParticipantModal(false);
+        setNewParticipantName("");
+        setEditingParticipantId(null);
+        await fetchData(true);
+      } catch (err: any) {
+        setToastMessage(extractErrorMessage(err, "Error al procesar el participante"));
+      } finally {
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // Creación de nuevo participante
+    const currentParticipantsCount = meeting?.participants?.length || 0;
+    
+    const hasAllExpenses = currentParticipantsCount > 0 && meeting?.expenses?.some((exp: any) => {
+      const consumersCount = exp.consumerIds?.length ?? exp.consumers?.length ?? 0;
+      return consumersCount === currentParticipantsCount;
+    });
+
+    const nameToCreate = newParticipantName.trim();
+    setShowAddParticipantModal(false);
+
+    if (hasAllExpenses) {
+      askConfirmation(
+        "Gastos anteriores detectados",
+        `Hay gastos cargados 'Para todos'. ¿Querés incluir a "${nameToCreate}" en esos gastos?`,
+        () => {
+          setConfirmConfig(prev => ({ ...prev, onCancel: undefined }));
+          setShowConfirm(false);
+          executeCreateParticipant(nameToCreate, true);
+        },
+        "Sí, incluir",
+        () => {
+          executeCreateParticipant(nameToCreate, false);
+        }
+      );
+    } else {
+      await executeCreateParticipant(nameToCreate, false);
     }
   };
 
@@ -127,62 +180,66 @@ export default function MeetingDetail() {
       "¿Eliminar participante?",
       `¿Seguro que querés eliminar a ${pName}? También se borrarán sus gastos asociados.`,
       async () => {
+        if (isSubmittingRef.current) return;
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        setShowConfirm(false);
         try {
           await participantService.deleteParticipant(pId);
-          fetchData(true); //
+          await fetchData(true);
         } catch (err: any) { 
           setToastMessage(extractErrorMessage(err, "Error al eliminar participante"));
+        } finally {
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
         }
-      }
+      },
+      "Eliminar"
     );
   };
 
   // --- MANEJO: GASTOS ---
   const handleSubmitExpense = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id) return;
+    if (!id || isSubmittingRef.current) return;
 
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
-      const data = {
+      const data: ExpenseRequest = {
         description: expenseData.description,
         amount: Number(expenseData.amount),
-        payerId: Number(expenseData.payerId)
+        payerId: Number(expenseData.payerId),
+        consumerIds: expenseData.consumerIds.length > 0 ? expenseData.consumerIds : undefined
       };
 
       if (editingExpenseId) {
         await expenseService.updateExpense(editingExpenseId, data);
-        setMeeting((prev: any) => ({
-          ...prev,
-          expenses: prev.expenses.map((exp: any) => 
-            exp.id === editingExpenseId 
-              ? { ...exp, ...data, payerName: meeting.participants.find((p:any) => p.id === data.payerId)?.name } 
-              : exp
-          )
-        }));
       } else {
         await expenseService.createExpense(id, data);
       }
-    
+
       setShowModal(false);
       setEditingExpenseId(null);
-      setExpenseData({ description: '', amount: '', payerId: '' });
-      await fetchData(); 
+      setExpenseData({ description: '', amount: '', payerId: '', consumerIds: [] });
+      await fetchData(true);
 
     } catch (err: any) {
       setToastMessage(extractErrorMessage(err, "Error al procesar el gasto"));
     } finally {
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };
 
-  const handleEditClick = (exp: any) => {
-    setEditingExpenseId(exp.id);
+  const handleEditClick = (expense: any) => {
+    setEditingExpenseId(expense.id);
     setExpenseData({
-      description: exp.description,
-      amount: exp.amount.toString(),
-      payerId: exp.payerId.toString()
+      description: expense.description,
+      amount: expense.amount.toString(),
+      payerId: expense.payerId ? expense.payerId.toString() : (expense.payer?.id?.toString() || ''),
+      consumerIds: expense.consumerIds || expense.consumers?.map((c: any) => c.id) || []
     });
     setShowExpensesModal(false);
     setShowModal(true);
@@ -193,15 +250,44 @@ export default function MeetingDetail() {
       "¿Borrar gasto?",
       `¿Estás seguro de que querés eliminar "${exp.description}" por $${exp.amount}?`,
       async () => {
+        if (isSubmittingRef.current) return;
+        isSubmittingRef.current = true;
+        setIsSubmitting(true);
+        setShowConfirm(false);
         try {
           await expenseService.deleteExpense(id!, exp.id);
           await fetchData(true);
         } catch(e) {
           setToastMessage("No se pudo borrar");
+        } finally {
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
         }
-      }
+      },
+      "Eliminar"
     );
   };
+
+  // --- CÁLCULO DE GASTOS GENERALES VS ESPECÍFICOS ---
+  const totalParticipants = meeting?.participants?.length || 0;
+
+  const { sharedExpensesTotal, specificExpensesTotal } = (meeting?.expenses || []).reduce(
+    (acc: { sharedExpensesTotal: number; specificExpensesTotal: number }, exp: any) => {
+      const consumersCount = exp.consumerIds?.length ?? exp.consumers?.length ?? 0;
+      
+      const isForEveryone = consumersCount === 0 || (totalParticipants > 0 && consumersCount === totalParticipants);
+
+      if (isForEveryone) {
+        acc.sharedExpensesTotal += Number(exp.amount || 0);
+      } else {
+        acc.specificExpensesTotal += Number(exp.amount || 0);
+      }
+      return acc;
+    },
+    { sharedExpensesTotal: 0, specificExpensesTotal: 0 }
+  );
+
+  const hasSpecificExpenses = specificExpensesTotal > 0;
 
   // --- UTILIDADES: CALCULOS Y EXPORTS ---
   const getTotalPaid = (name: string) => {
@@ -228,8 +314,14 @@ export default function MeetingDetail() {
     return `${hours}h ${minutes}m restante`;
   };
 
-  const askConfirmation = (title: string, message: string, action: () => void) => {
-    setConfirmConfig({ title, message, onConfirm: action });
+  const askConfirmation = (
+    title: string, 
+    message: string, 
+    action: () => void, 
+    confirmText = "Eliminar", 
+    cancelAction?: () => void
+  ) => {
+    setConfirmConfig({ title, message, confirmText, onConfirm: action, onCancel: cancelAction });
     setShowConfirm(true);
   };
 
@@ -238,7 +330,14 @@ export default function MeetingDetail() {
     let text = `${balanceData.meetingName}\n`;
     text += `Generado con: ${window.location.origin}\n\n`;
     text += `💰 Total gastado: $${balanceData.totalAmount.toLocaleString()}\n`;
-    text += `👤 Por persona: $${balanceData.averagePerPerson.toLocaleString()}\n\n`;
+    
+    if (hasSpecificExpenses) {
+      text += `👥 Gastos para todos: $${sharedExpensesTotal.toLocaleString()}\n`;
+      text += `🎯 Gastos específicos: $${specificExpensesTotal.toLocaleString()}\n\n`;
+    } else {
+      text += `👤 Por persona: $${balanceData.averagePerPerson.toLocaleString()}\n\n`;
+    }
+
     text += `📋 Detalle: \n`;
     balanceData.participantBalances.forEach(p => {
       text += `- ${p.name}: $${p.totalPaid.toLocaleString()}\n`;
@@ -384,7 +483,7 @@ export default function MeetingDetail() {
       </section>
 
       {/* SECCION: TICKET FINAL */}
-      {balanceData && balanceData.totalAmount > 0 && (
+      {balanceData && balanceData.totalAmount > 0 && balanceData.transferSuggestions.length > 0 && (
         <section className="mt-12 mb-24 animate-in zoom-in-95 duration-500 max-w-sm mx-auto ">
           <div 
             id="ticket-visual" 
@@ -407,12 +506,26 @@ export default function MeetingDetail() {
             <div className="space-y-2 border-b border-dashed border-gray-200 pb-4 mb-4 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Total Juntada:</span>
-                <span className="font-semibold text-chocolate-dark">${balanceData.totalAmount.toLocaleString()}</span>
+                <span className="font-semibold text-chocolate-gold">${balanceData.totalAmount.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Gasto por persona:</span>
-                <span className="font-semibold text-chocolate-gold">${balanceData.averagePerPerson.toLocaleString()}</span>
-              </div>
+
+              {hasSpecificExpenses ? (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Gastos para todos:</span>
+                    <span className="font-semibold text-chocolate-dark">${sharedExpensesTotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Gastos específicos:</span>
+                    <span className="font-semibold text-chocolate-dark">${specificExpensesTotal.toLocaleString()}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Gasto por persona:</span>
+                  <span className="font-semibold text-chocolate-dark">${balanceData.averagePerPerson.toLocaleString()}</span>
+                </div>
+              )}
             </div>
 
             <div className="mb-2">
@@ -477,7 +590,7 @@ export default function MeetingDetail() {
           setShowModal(false);
           setEditingExpenseId(null);
           fetchData();
-          setExpenseData({ description: '', amount: '', payerId: '' });
+          setExpenseData({ description: '', amount: '', payerId: '', consumerIds: [] });
         }}
         onSubmit={handleSubmitExpense}
         expenseData={expenseData}
@@ -508,9 +621,10 @@ export default function MeetingDetail() {
           setShowExpensesModal(false);
           setEditingExpenseId(null);
           fetchData();
-          setExpenseData({ description: '', amount: '', payerId: '' });
+          setExpenseData({ description: '', amount: '', payerId: '', consumerIds: [] });
         }}
         expenses={meeting?.expenses || []}
+        participants={meeting?.participants || []}
         onEdit={handleEditClick}
         onDelete={handleDeleteExpenseClick}
       />
@@ -519,10 +633,17 @@ export default function MeetingDetail() {
         isOpen={showConfirm}
         onClose={() => {
           setShowConfirm(false);
-          fetchData();
+          const currentCancel = confirmConfig.onCancel;
+          setConfirmConfig({ title: '', message: '', confirmText: 'Eliminar', onConfirm: () => {} });
+          if (currentCancel) {
+            currentCancel();
+          } else {
+            fetchData();
+          }
         }}
         title={confirmConfig.title}
         message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
         onConfirm={confirmConfig.onConfirm}
       />
 
