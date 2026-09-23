@@ -70,6 +70,11 @@ export const meetingService = {
         return response.data;
     },
 
+    getTotalMeetings: async (): Promise<{ total: number }> => {
+        const response = await api.get('/meetings/stats/total-meetings');
+        return response.data;
+    },
+
     getBalance: async (id: string): Promise<MeetingBalanceResponse> => {
         const response = await api.get(`/meetings/${id}/balance`);
         return response.data;
