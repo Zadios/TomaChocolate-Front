@@ -10,6 +10,7 @@ export interface ExpenseRequest {
     description: string;
     amount: number;
     payerId: number;
+    consumerIds?: number[];
 }
 
 export interface TransferStrategy {
@@ -44,11 +45,10 @@ export interface Meeting {
 };
 
 export const participantService = {
-  createParticipant: (meetingId: string, name: string) => {
-    return api.post(`/participants/${meetingId}/participant`, name, {
-      headers: { 'Content-Type': 'text/plain' }
-    });
-  },
+    createParticipant: (meetingId: string, name: string, includeInAllExpenses: boolean = false) =>
+        api.post(`/participants/${meetingId}/participant?includeInAllExpenses=${includeInAllExpenses}`, name, {
+            headers: { 'Content-Type': 'text/plain' }
+        }).then(res => res.data),
 
   updateName: async (id: number, name: string): Promise<void> => {
     await api.patch(`/participants/${id}`, { name });
@@ -67,6 +67,11 @@ export const meetingService = {
 
     getMeeting: async (id: string): Promise<Meeting> => {
         const response = await api.get<Meeting>(`/meetings/${id}`);
+        return response.data;
+    },
+
+    getTotalMeetings: async (): Promise<{ total: number }> => {
+        const response = await api.get('/meetings/stats/total-meetings');
         return response.data;
     },
 

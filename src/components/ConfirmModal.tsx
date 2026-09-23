@@ -1,4 +1,3 @@
-// components/ConfirmModal.tsx
 interface Props {
   isOpen: boolean;
   onClose: () => void;
